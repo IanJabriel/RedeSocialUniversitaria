@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RedeSocialUniversidade.Aplication\RedeSocialUniversidade.Application.csproj" />
     <ProjectReference Include="..\RedeSocialUniversidade.Domain\RedeSocialUniversidade.Domain.csproj" />
     <ProjectReference Include="..\RedeSocialUniversidade.Infra\RedeSocialUniversidade.Infra.csproj" />
   </ItemGroup>
