@@ -67,5 +67,11 @@ namespace RedeSocialUniversidade.Infra.Repository
             return await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
+        public async Task<Usuario> ObterPorEmailAsync(string email)
+        {
+            return await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+        }
     }
 }

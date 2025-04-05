@@ -3,6 +3,7 @@ using RedeSocialUniversidade.Infra.Repository;
 using RedeSocialUniversidade.Application.Services;
 using RedeSocialUniversidade.Infra;
 using System.Text.Json.Serialization;
+using RedeSocialUniversidade.Domain.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +19,14 @@ builder.Services.AddSwaggerGen();
 // Registro dos repositórios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IPostagemRepository, PostagemRepository>();
+builder.Services.AddScoped<IEventoRepository, EventoRepository>();
 
 // Registro dos services
 builder.Services.AddScoped<UsuarioAppService>();
 builder.Services.AddScoped<PostagemAppService>();
+builder.Services.AddScoped<EventoAppService>();
+
+
 
 builder.Services.AddDbContext<SqlContext>();
 

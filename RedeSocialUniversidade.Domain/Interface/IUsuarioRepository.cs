@@ -12,6 +12,7 @@ namespace RedeSocialUniversidade.Domain.Interface
         Task AddAsync(Usuario usuario);
         Task<bool> SaveChangesAsync();
         Task<Usuario> ObterComSeguidoresAsync(int id);
+        Task<Usuario> ObterPorEmailAsync(string email);
         Task<bool> UsuarioSegueOutroAsync(int usuarioId, int seguidorId);
     }
 }

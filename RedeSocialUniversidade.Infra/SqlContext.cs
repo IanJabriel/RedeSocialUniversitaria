@@ -66,11 +66,25 @@ namespace RedeSocialUniversidade.Infra
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+            // Confiugração para Evento
+            modelBuilder.Entity<Evento>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Nome).IsRequired().HasMaxLength(100);
+                e.Property(x => x.Local).IsRequired().HasMaxLength(200);
+                e.HasMany(x => x.Inscricoes).WithOne(x => x.Evento);
+            });
+
+            modelBuilder.Entity<InscricaoEvento>(e =>
+            {
+                e.HasKey(x => new { x.EventoId, x.UsuarioId });
+                e.HasOne(x => x.Usuario).WithMany().OnDelete(DeleteBehavior.Restrict);
+            });
         }
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Postagem> Postagens { get; set; }
-        //public DbSet<Evento> Eventos { get; set; }
+        public DbSet<Evento> Eventos { get; set; }
 
     }
 }
