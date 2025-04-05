@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RedeSocialUniversidade.Application.DTOs
+namespace RedeSocialUniversidade.Application.DTOs.Usuario
 {
     public record CriarUsuarioDto(
         [Required] string Nome,

@@ -22,9 +22,29 @@ namespace RedeSocialUniversidade.Infra.Repository
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
+        public async Task<bool> ExisteIdAsync(int id)
+        {
+            return await _context.Usuarios.AnyAsync(u => u.Id == id);
+        }
+
         public async Task AdicionarAsync(Usuario usuario)
         {
             await _context.Usuarios.AddAsync(usuario);
+        }
+
+        public async Task<Usuario> ObterComSeguidoresAsync(int id)
+        {
+            return await _context.Usuarios
+                .Include(u => u.Seguidores)
+                    .ThenInclude(s => s.UsuarioSeguidor)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<bool> UsuarioSegueOutroAsync(int usuarioId, int seguidorId)
+        {
+            return await _context.Set<Seguidor>()
+                .AnyAsync(s => s.UsuarioSeguidoId == usuarioId &&
+                              s.UsuarioSeguidorId == seguidorId);
         }
 
         public async Task<bool> ExisteEmailAsync(string email)
@@ -40,6 +60,12 @@ namespace RedeSocialUniversidade.Infra.Repository
         public async Task<bool> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<Usuario> ObterPorIdAsync(int id)
+        {
+            return await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
     }
 }

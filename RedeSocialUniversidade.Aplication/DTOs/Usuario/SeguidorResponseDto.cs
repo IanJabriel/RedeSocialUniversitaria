@@ -1,4 +1,4 @@
-﻿namespace RedeSocialUniversidade.Application.DTOs
+﻿namespace RedeSocialUniversidade.Application.DTOs.Usuario
 {
     public class SeguidorResponseDto
     {

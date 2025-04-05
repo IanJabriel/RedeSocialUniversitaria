@@ -12,6 +12,7 @@ namespace RedeSocialUniversidade.Infra
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Configuração para Seguidor
             modelBuilder.Entity<Seguidor>(entity =>
             {
                 entity.HasKey(s => new { s.UsuarioSeguidoId, s.UsuarioSeguidorId });
@@ -26,10 +27,49 @@ namespace RedeSocialUniversidade.Infra
                       .HasForeignKey(s => s.UsuarioSeguidorId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // Configuração para Postagem
+            modelBuilder.Entity<Postagem>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+                entity.Property(p => p.Conteudo).IsRequired().HasMaxLength(2000);
+                entity.HasOne(p => p.Autor)
+                      .WithMany()
+                      .HasForeignKey(p => p.AutorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configuração para Comentario
+            modelBuilder.Entity<Comentario>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Texto).IsRequired().HasMaxLength(500);
+                entity.HasOne(c => c.Postagem)
+                      .WithMany(p => p.Comentarios)
+                      .HasForeignKey(c => c.PostagemId);
+                entity.HasOne(c => c.Autor)
+                      .WithMany()
+                      .HasForeignKey(c => c.AutorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configuração para Curtida (tabela de junção)
+            modelBuilder.Entity<Curtida>(entity =>
+            {
+                entity.HasKey(c => new { c.PostagemId, c.UsuarioId });
+                entity.HasOne(c => c.Postagem)
+                      .WithMany(p => p.Curtidas)
+                      .HasForeignKey(c => c.PostagemId);
+                entity.HasOne(c => c.Usuario)
+                      .WithMany()
+                      .HasForeignKey(c => c.UsuarioId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
         }
 
         public DbSet<Usuario> Usuarios { get; set; }
-        //public DbSet<Postagem> Postagens { get; set; }
+        public DbSet<Postagem> Postagens { get; set; }
         //public DbSet<Evento> Eventos { get; set; }
 
     }

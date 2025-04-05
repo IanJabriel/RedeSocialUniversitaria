@@ -1,4 +1,4 @@
-﻿using RedeSocialUniversidade.Application.DTOs;
+﻿using RedeSocialUniversidade.Application.DTOs.Usuario;
 using RedeSocialUniversidade.Domain.Entities;
 using RedeSocialUniversidade.Domain.Exceptions;
 using RedeSocialUniversidade.Domain.Interface;
@@ -27,8 +27,14 @@ namespace RedeSocialUniversidade.Application.Services
 
         public async Task SeguirUsuarioAsync(int usuarioId, int seguidorId)
         {
-            var usuario = await _usuarioRepo.ObterIdAsync(usuarioId)
+            if (usuarioId == seguidorId)
+                throw new DomainException("Não pode seguir a si mesmo");
+
+            var usuario = await _usuarioRepo.ObterComSeguidoresAsync(usuarioId)
                 ?? throw new DomainException("Usuário não encontrado");
+
+            if (await _usuarioRepo.UsuarioSegueOutroAsync(usuarioId, seguidorId))
+                throw new DomainException("Você já segue este usuário");
 
             var seguidor = await _usuarioRepo.ObterIdAsync(seguidorId)
                 ?? throw new DomainException("Seguidor não encontrado");
@@ -36,9 +42,7 @@ namespace RedeSocialUniversidade.Application.Services
             usuario.AdicionarSeguidor(seguidor.Id);
 
             if (!await _usuarioRepo.SaveChangesAsync())
-            {
                 throw new Exception("Falha ao salvar o seguidor");
-            }
         }
 
         public async Task<Usuario> ObterUsuarioAsync(int id)

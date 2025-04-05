@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RedeSocialUniversidade.Application.DTOs;
+using RedeSocialUniversidade.Application.DTOs.Usuario;
 using RedeSocialUniversidade.Application.Services;
 using RedeSocialUniversidade.Domain.Exceptions;
 

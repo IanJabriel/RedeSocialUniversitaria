@@ -15,9 +15,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();   
 
-// Registro de dependências
+// Registro dos repositórios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IPostagemRepository, PostagemRepository>();
+
+// Registro dos services
 builder.Services.AddScoped<UsuarioAppService>();
+builder.Services.AddScoped<PostagemAppService>();
 
 builder.Services.AddDbContext<SqlContext>();
 
