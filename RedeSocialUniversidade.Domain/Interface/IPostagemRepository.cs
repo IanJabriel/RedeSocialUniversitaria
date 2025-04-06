@@ -8,6 +8,7 @@ namespace RedeSocialUniversidade.Domain.Interface
         Task<Postagem> ObterPorIdAsync(int id);
         Task<Postagem> ObterComRelacionamentosAsync(int id);
         Task<List<Postagem>> ListarPostagensPorUsuarioAsync(int id);
+        Task<Postagem> ObterComRelacionamentosParaEdicaoAsync(int id);
         Task SalvarAsync();
     }
 }

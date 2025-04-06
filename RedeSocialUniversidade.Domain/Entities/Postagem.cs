@@ -13,10 +13,10 @@ namespace RedeSocialUniversidade.Domain.Entities
         private readonly List<Curtida> _curtidas = new();
         public IReadOnlyCollection<Curtida> Curtidas => _curtidas.AsReadOnly();
 
-        private readonly List<Comentario> _comentarios = new();
+        private readonly List<Comentario> _comentarios = new List<Comentario>();
         public IReadOnlyCollection<Comentario> Comentarios => _comentarios.AsReadOnly();
 
-        protected Postagem() { } // Para o EF Core
+        protected Postagem() { }
 
         public Postagem(int autorId, string conteudo)
         {
@@ -44,27 +44,34 @@ namespace RedeSocialUniversidade.Domain.Entities
 
         public void AdicionarComentario(int autorId, string texto)
         {
-            _comentarios.Add(new Comentario(this.Id, autorId, texto));
+            _comentarios.Add(new Comentario
+            {
+                Texto = texto,
+                AutorId = autorId,
+                PostagemId = this.Id,
+                DataHora = DateTime.Now
+            });
         }
     }
 
     public class Comentario
     {
-        public int Id { get; private set; }
-        public int PostagemId { get; private set; }
-        public Postagem Postagem { get; private set; }
-        public int AutorId { get; private set; }
-        public Usuario Autor { get; private set; }
-        public string Texto { get; private set; }
-        public DateTime DataHora { get; private set; } = DateTime.Now;
+        public int Id { get; set; }
+        public string Texto { get; set; }
+        public int AutorId { get; set; }
+        public Usuario Autor { get; set; }
+        public int PostagemId { get; set; }
+        public Postagem Postagem { get; set; }
+        public DateTime DataHora { get; set; }
 
-        protected Comentario() { } // Para o EF Core
+        public Comentario() { }
 
-        public Comentario(int postagemId, int autorId, string texto)
+        public Comentario(string texto, int autorId, int postagemId)
         {
-            PostagemId = postagemId;
-            AutorId = autorId;
             Texto = texto;
+            AutorId = autorId;
+            PostagemId = postagemId;
+            DataHora = DateTime.Now;
             Validar();
         }
 

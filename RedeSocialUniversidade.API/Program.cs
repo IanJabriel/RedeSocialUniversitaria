@@ -23,8 +23,13 @@ builder.Services.AddScoped<IEventoRepository, EventoRepository>();
 
 // Registro dos services
 builder.Services.AddScoped<UsuarioAppService>();
+builder.Services.AddScoped<IUsuarioDomainService,UsuarioDomainService>();
+
 builder.Services.AddScoped<PostagemAppService>();
+builder.Services.AddScoped<IPostagemDomainService,PostagemDomainService>();
+
 builder.Services.AddScoped<EventoAppService>();
+builder.Services.AddScoped<IEventoDomainService,EventoDomainService>();
 
 
 

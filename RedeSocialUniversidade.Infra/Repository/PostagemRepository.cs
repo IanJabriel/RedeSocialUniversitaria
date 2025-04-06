@@ -42,6 +42,16 @@ namespace RedeSocialUniversidade.Infra.Repository
                 .AsNoTracking()                 // Melhora performance para consultas somente leitura
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+        public async Task<Postagem> ObterComRelacionamentosParaEdicaoAsync(int id)
+        {
+            return await _context.Postagens
+                .Include(p => p.Autor)
+                .Include(p => p.Curtidas)
+                    .ThenInclude(c => c.Usuario)
+                .Include(p => p.Comentarios)
+                    .ThenInclude(c => c.Autor)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
 
         public async Task<List<Postagem>> ListarPostagensPorUsuarioAsync(int usuarioId)
         {

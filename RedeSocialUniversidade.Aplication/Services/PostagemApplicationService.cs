@@ -3,6 +3,7 @@ using RedeSocialUniversidade.Application.DTOs.Shared;
 using RedeSocialUniversidade.Domain.Entities;
 using RedeSocialUniversidade.Domain.Exceptions;
 using RedeSocialUniversidade.Domain.Interface;
+using RedeSocialUniversidade.Domain.Services;
 
 namespace RedeSocialUniversidade.Application.Services
 {
@@ -10,50 +11,51 @@ namespace RedeSocialUniversidade.Application.Services
     {
         private readonly IPostagemRepository _postagemRepo;
         private readonly IUsuarioRepository _usuarioRepo;
+        private readonly IPostagemDomainService _postagemDomainService;
 
-        public PostagemAppService(IPostagemRepository postagemRepo, IUsuarioRepository usuarioRepo)
+        public PostagemAppService(
+            IPostagemRepository postagemRepo,
+            IUsuarioRepository usuarioRepo,
+            IPostagemDomainService postagemDomainService)
         {
             _postagemRepo = postagemRepo;
             _usuarioRepo = usuarioRepo;
+            _postagemDomainService = postagemDomainService;
         }
 
         public async Task<PostagemResponseDto> CriarPostagemAsync(CriarPostagemDto dto)
         {
-            var usuario = await _usuarioRepo.ObterIdAsync(dto.AutorId);
-            if (usuario == null)
-                throw new DomainException("Usuário não encontrado");
+            var usuario = await _usuarioRepo.ObterPorIdAsync(dto.AutorId)
+                ?? throw new DomainException("Usuário não encontrado");
+
+            _postagemDomainService.ValidarCriacaoPostagem(usuario, dto.Conteudo);
 
             var postagem = new Postagem(dto.AutorId, dto.Conteudo);
             await _postagemRepo.AdicionarAsync(postagem);
             await _postagemRepo.SalvarAsync();
 
-            var postagemComAutor = await _postagemRepo.ObterComRelacionamentosAsync(postagem.Id);
-            return MapearParaDto(postagemComAutor);
+            return MapearParaDto(await _postagemRepo.ObterComRelacionamentosAsync(postagem.Id));
         }
 
         public async Task<PostagemResponseDto> ObterPostagemAsync(int id)
         {
-            var postagem = await _postagemRepo.ObterComRelacionamentosAsync(id);
-            if (postagem == null)
-                throw new DomainException("Postagem não encontrada");
+            var postagem = await _postagemRepo.ObterComRelacionamentosAsync(id)
+                ?? throw new DomainException("Postagem não encontrada");
 
             return MapearParaDto(postagem);
         }
 
         public async Task CurtirPostagemAsync(int postagemId, CurtirPostagemDto dto)
         {
-            var postagem = await _postagemRepo.ObterComRelacionamentosAsync(postagemId)
+            var postagem = await _postagemRepo.ObterComRelacionamentosParaEdicaoAsync(postagemId)
                 ?? throw new DomainException("Postagem não encontrada");
 
-            var usuarioExiste = await _usuarioRepo.ExisteIdAsync(dto.UsuarioId);
-            if (!usuarioExiste)
-                throw new DomainException("Usuário não encontrado");
+            var usuario = await _usuarioRepo.ObterPorIdAsync(dto.UsuarioId)
+                ?? throw new DomainException("Usuário não encontrado");
 
-            if (postagem.AutorId == dto.UsuarioId)
-                throw new DomainException("Você não pode curtir sua própria postagem");
+            _postagemDomainService.ValidarCurtida(usuario, postagem);
 
-            // 4. Adicionar curtida
-            postagem.AdicionarCurtida(postagemId,dto.UsuarioId);
+            postagem.AdicionarCurtida(postagemId, dto.UsuarioId);
             await _postagemRepo.SalvarAsync();
         }
 
@@ -61,6 +63,21 @@ namespace RedeSocialUniversidade.Application.Services
         {
             var postagens = await _postagemRepo.ListarPostagensPorUsuarioAsync(usuarioId);
             return postagens.Select(MapearParaDto).ToList();
+        }
+
+        public async Task AdicionarComentarioAsync(int postagemId, ComentarioRequestDto dto)
+        {
+            var postagem = await _postagemRepo.ObterComRelacionamentosParaEdicaoAsync(postagemId)
+                ?? throw new DomainException("Postagem não encontrada");
+
+            var usuario = await _usuarioRepo.ObterPorIdAsync(dto.UsuarioId)
+                ?? throw new DomainException("Usuário não encontrado");
+
+            _postagemDomainService.ValidarComentario(usuario, postagem, dto.Texto);
+
+            postagem.AdicionarComentario(dto.UsuarioId, dto.Texto);
+
+            await _postagemRepo.SalvarAsync();
         }
 
         private PostagemResponseDto MapearParaDto(Postagem postagem)
@@ -90,18 +107,6 @@ namespace RedeSocialUniversidade.Application.Services
                     DataHora = c.DataHora
                 }).ToList()
             };
-        }
-
-        public async Task AdicionarComentarioAsync(int postagemId, ComentarioRequestDto dto)
-        {
-            var postagem = await _postagemRepo.ObterPorIdAsync(postagemId)
-                ?? throw new DomainException("Postagem não encontrada");
-
-            var usuario = await _usuarioRepo.ObterPorIdAsync(dto.UsuarioId)
-                ?? throw new DomainException("Usuário não encontrado");
-
-            postagem.AdicionarComentario(dto.UsuarioId, dto.Texto);
-            await _postagemRepo.SalvarAsync();
         }
     }
 }
