@@ -21,6 +21,10 @@ namespace RedeSocialUniversidade.Infra.Repository
 
             await _context.Eventos.AddAsync(evento);
         }
+        public async Task RemoverAsync(Evento evento)
+        {
+            _context.Eventos.Remove(evento);
+        }
 
         public async Task<Evento> ObterPorIdAsync(int id)
         {
@@ -41,7 +45,7 @@ namespace RedeSocialUniversidade.Infra.Repository
         {
             return await _context.Eventos
                 .AsNoTracking()
-                .OrderBy(e => e.DataHora)
+                .OrderBy(e => e.Id)
                 .ToListAsync();
         }
 
@@ -101,5 +105,24 @@ namespace RedeSocialUniversidade.Infra.Repository
                     e.DataHora >= inicio &&
                     e.DataHora <= fim);
         }
+
+        public async Task<int> ContarInscricoesAsync(int eventoId)
+        {
+            return await _context.Set<InscricaoEvento>()
+            .CountAsync(i => i.EventoId == eventoId);
+        }
+
+        public async Task CancelarInscricaoAsync(int eventoId, int usuarioId)
+        {
+            var inscricao = await _context.Set<InscricaoEvento>()
+                .FirstOrDefaultAsync(i => i.EventoId == eventoId && i.UsuarioId == usuarioId);
+
+            if (inscricao == null)
+                throw new DomainException("Inscrição não encontrada");
+
+            _context.Set<InscricaoEvento>().Remove(inscricao);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

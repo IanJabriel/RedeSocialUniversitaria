@@ -12,11 +12,9 @@ namespace RedeSocialUniversidade.Domain.Entities
         public bool ExigeInscricao { get; private set; }
         public int LimiteParticipantes { get; private set; }
 
-        // Relacionamentos
         private readonly List<InscricaoEvento> _inscricoes = new();
         public IReadOnlyCollection<InscricaoEvento> Inscricoes => _inscricoes.AsReadOnly();
 
-        // Construtor
         public Evento(string nome, string local, string descricao, DateTime dataHora,
                      bool exigeInscricao = false, int limiteParticipantes = 0)
         {
@@ -49,8 +47,8 @@ namespace RedeSocialUniversidade.Domain.Entities
             if (string.IsNullOrWhiteSpace(Nome))
                 throw new DomainException("Nome do evento é obrigatório");
 
-            if (DataHora < DateTime.Now.AddHours(1))
-                throw new DomainException("Evento deve ser agendado com pelo menos 1 hora de antecedência");
+            //if (DataHora <= DateTime.Now)
+            //    throw new DomainException("Evento deve ser agendado para o futuro");
         }
     }
 

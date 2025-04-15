@@ -30,7 +30,6 @@ public class EventoAppService
             dto.ExigeInscricao,
             dto.LimiteParticipantes);
 
-        // Validações de domínio
         await _eventoDomainService.ValidarCriacaoEvento(evento);
 
         await _eventoRepo.AdicionarAsync(evento);
@@ -47,7 +46,6 @@ public class EventoAppService
         var evento = await _eventoRepo.ObterComInscricoesAsync(eventoId);
         DomainException.When(evento == null, "Evento não encontrado");
 
-        // Validações de domínio para inscrição
         await _eventoDomainService.ValidarInscricaoEvento(usuario, evento);
 
         await _eventoRepo.RegistrarInscricaoAsync(eventoId, usuario.Email);

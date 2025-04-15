@@ -67,18 +67,29 @@ namespace RedeSocialUniversidade.Infra
             });
 
             // Confiugração para Evento
-            modelBuilder.Entity<Evento>(e =>
+            modelBuilder.Entity<Evento>(entity =>
             {
-                e.HasKey(x => x.Id);
-                e.Property(x => x.Nome).IsRequired().HasMaxLength(100);
-                e.Property(x => x.Local).IsRequired().HasMaxLength(200);
-                e.HasMany(x => x.Inscricoes).WithOne(x => x.Evento);
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Nome).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Local).IsRequired().HasMaxLength(200);
+                entity.HasMany(e => e.Inscricoes).WithOne(e =>e.Evento).OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<InscricaoEvento>(e =>
+
+            // Configuração para Inscrição em Evento
+            modelBuilder.Entity<InscricaoEvento>(entity =>
             {
-                e.HasKey(x => new { x.EventoId, x.UsuarioId });
-                e.HasOne(x => x.Usuario).WithMany().OnDelete(DeleteBehavior.Restrict);
+                entity.HasKey(i => new { i.EventoId, i.UsuarioId });
+                entity.HasOne(i=> i.Usuario)
+                .WithMany()
+                .HasForeignKey(i => i.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.Evento)
+                .WithMany(e => e.Inscricoes)
+                .HasForeignKey(i => i.EventoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
             });
         }
 

@@ -15,14 +15,10 @@ namespace RedeSocialUniversidade.Domain.Services
     public class EventoDomainService : IEventoDomainService
     {
         private readonly IEventoRepository _eventoRepository;
-        private readonly IUsuarioRepository _usuarioRepository;
 
-        public EventoDomainService(
-            IEventoRepository eventoRepository,
-            IUsuarioRepository usuarioRepository)
+        public EventoDomainService(IEventoRepository eventoRepository)
         {
             _eventoRepository = eventoRepository;
-            _usuarioRepository = usuarioRepository;
         }
 
         public async Task ValidarCriacaoEvento(Evento evento)
@@ -36,12 +32,8 @@ namespace RedeSocialUniversidade.Domain.Services
             if (evento.Nome.Length > 100)
                 throw new DomainException("Nome do evento excede o limite de 100 caracteres");
 
-            if (evento.DataHora < DateTime.Now.AddHours(1))
-                throw new DomainException("Evento deve ser agendado com pelo menos 1 hora de antecedência");
-
-            // Verifica conflito de horário no mesmo local
             var eventoConflitante = await _eventoRepository
-                .ObterEventoNoPeriodo(evento.Local, evento.DataHora.AddHours(-1), evento.DataHora.AddHours(1));
+                .ObterEventoNoPeriodo(evento.Local, evento.DataHora, evento.DataHora);
 
             if (eventoConflitante != null)
                 throw new DomainException($"Já existe um evento agendado neste local: {eventoConflitante.Nome}");
@@ -63,6 +55,12 @@ namespace RedeSocialUniversidade.Domain.Services
 
             if (await _eventoRepository.UsuarioEstaInscritoAsync(evento.Id, usuario.Id))
                 throw new DomainException("Usuário já está inscrito neste evento");
+
+            if(evento.LimiteParticipantes > 0)
+            {
+                var totalInscritos = await _eventoRepository.ContarInscricoesAsync(evento.Id);
+                if (totalInscritos >= evento.LimiteParticipantes) throw new DomainException("O Evento atingiu o limite de participantes");
+            }
         }
     }
 }

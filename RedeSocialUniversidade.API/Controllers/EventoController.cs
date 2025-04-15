@@ -55,7 +55,7 @@ namespace RedeSocialUniversidade.API.Controllers
         {
             try
             {
-                var evento = await _eventoRepository.ObterPorIdAsync(id);
+                var evento = await _eventoRepository.ObterComInscricoesAsync(id);
 
                 if (evento == null)
                     return NotFound(new { Message = "Evento não encontrado" });
@@ -82,6 +82,30 @@ namespace RedeSocialUniversidade.API.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletarEvento(int id)
+        {
+            try
+            {
+                var evento = await _eventoRepository.ObterComInscricoesAsync(id);
+                if (evento == null)
+                    return NotFound(new { Message = "Evento não encontrado" });
+
+                await _eventoRepository.RemoverAsync(evento);
+                await _eventoRepository.SalvarAsync();
+
+                return NoContent();
+            }
+            catch (DomainException ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Erro ao deletar evento", Detalhes = ex.Message });
+            }
+        }
+
         [HttpPost("{eventoId}/inscricoes")]
         public async Task<IActionResult> AdicionarInscricao(int eventoId, [FromBody] InscricaoEventoDto dto)
         {
@@ -105,19 +129,5 @@ namespace RedeSocialUniversidade.API.Controllers
         }
 
         public record InscricaoEvento(string Email);
-
-        [HttpDelete("{eventoId}/inscricoes")]
-        public async Task<IActionResult> CancelarInscricao(int eventoId)
-        {
-            try
-            {
-                var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                return NoContent();
-            }
-            catch (DomainException ex)
-            {
-                return BadRequest(new { ex.Message });
-            }
-        }
     }
 }
